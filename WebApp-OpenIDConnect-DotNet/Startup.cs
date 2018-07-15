@@ -11,22 +11,18 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp_OpenIDConnect_DotNet
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -41,16 +37,22 @@ namespace WebApp_OpenIDConnect_DotNet
             .AddAzureAdB2C(options => Configuration.Bind("Authentication:AzureAdB2C", options))
             .AddCookie();
 
-            // Add framework services.
-            services.AddMvc();
-            
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
             // Adds a default in-memory implementation of IDistributedCache.
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromHours(1);
                 options.Cookie.HttpOnly = true;
-            });            
+            });
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,7 +64,6 @@ namespace WebApp_OpenIDConnect_DotNet
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
             }
             else
             {

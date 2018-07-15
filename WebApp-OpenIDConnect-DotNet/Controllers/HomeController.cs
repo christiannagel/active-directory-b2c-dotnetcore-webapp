@@ -12,6 +12,7 @@ using System.Net.Http;
 using System.Net;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
+using System.Diagnostics;
 
 namespace WebApp_OpenIDConnect_DotNet.Controllers
 {
@@ -83,10 +84,16 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
             return View();
         }
 
-        public IActionResult Error(string message)
+        public IActionResult Privacy()
         {
-            ViewBag.Message = message;
             return View();
+        }
+
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }
