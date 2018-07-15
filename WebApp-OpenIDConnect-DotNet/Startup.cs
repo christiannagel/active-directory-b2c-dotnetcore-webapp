@@ -49,10 +49,8 @@ namespace WebApp_OpenIDConnect_DotNet
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromHours(1);
-                options.CookieHttpOnly = true;
-            });
-
-            
+                options.Cookie.HttpOnly = true;
+            });            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
